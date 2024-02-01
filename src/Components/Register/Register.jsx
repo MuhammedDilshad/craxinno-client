@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { signUp } from "../../Api/UserRegister.js";
-import { IoMdAlert } from "react-icons/io";
+import { IoMdAlert, IoMdClose } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 function Register() {
+  const [alertMessage, setAlertMessage] = useState("");
+  const showAlert = alertMessage !== "";
+
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -29,18 +32,22 @@ function Register() {
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Required"),
     }),
+
     onSubmit: async (values, { setErrors }) => {
       try {
         const response = await signUp(values);
         console.log("Form data submitted:", response.data);
+
         if (response.data?.errors) {
-          console.log("Showing toast");
-          alert(response.data.errors.message);
+          console.log("Showing alert");
+          setAlertMessage(response.data.errors.message);
         }
 
         localStorage.setItem("user", response.data);
         setErrors({});
-        navigate("/home");
+        if (!response.data?.errors) {
+          navigate("/home");
+        }
       } catch (error) {
         if (error.response && error.response.data.errors) {
           setErrors(error.response.data.errors);
@@ -51,6 +58,10 @@ function Register() {
     },
   });
 
+  const closeAlert = () => {
+    setAlertMessage("");
+  };
+
   return (
     <div className="bg-white flex justify-center ">
       <div className="p-7">
@@ -60,6 +71,16 @@ function Register() {
             Set-up your RentlyPass in as little as 2 minutes.
           </p>
         </div>
+        {showAlert && (
+          <div className="bg-red-200 p-4 mb-4 rounded-md flex items-center">
+            <IoMdAlert className="text-red-500" />
+            <p className="text-red-500 pl-3">{alertMessage}</p>
+            <button onClick={closeAlert} className="ml-auto" aria-label="Close">
+              <IoMdClose className="text-gray-500" />
+            </button>
+          </div>
+        )}
+
         <form onSubmit={formik.handleSubmit}>
           <strong className="text-gray-600">Contact details</strong>
           <div className="flex flex-col gap-5">
