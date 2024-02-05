@@ -3,12 +3,14 @@ import { Bs1Circle } from "react-icons/bs";
 import { Bs2Circle } from "react-icons/bs";
 import { IoMdAlert } from "react-icons/io";
 import { personalInfo } from "../../Api/UserRegister.js";
+import { useNavigate } from "react-router-dom";
 
 function PersonalData() {
   const [show, setShow] = useState(true);
+  const navigate = useNavigate();
 
   const [initialvalues, setInitialvalues] = useState({
-    title: "",
+    gender: "",
     fullname: "",
     date: "",
     address: "",
@@ -27,8 +29,32 @@ function PersonalData() {
   const handleSubmitForm1 = (e) => {
     setShow((prev) => !prev);
   };
+
   const handleSubmitForm2 = async (e) => {
-    await personalInfo(initialvalues);
+    e.preventDefault();
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userId = storedUser ? storedUser._id : null;
+
+      if (!userId) {
+        console.error("User ID not found in local storage.");
+        return;
+      }
+
+      const requestPayload = {
+        ...initialvalues,
+        userId: userId,
+      };
+
+      const response = await personalInfo(requestPayload);
+      console.log(response.data, "Log the entire response object");
+
+      navigate(`/user/${userId}`);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+
+      alert("An error occurred while submitting the form. Please try again.");
+    }
   };
 
   return (
@@ -60,10 +86,9 @@ function PersonalData() {
                   <div className="text-black">
                     <div className="flex gap-5">
                       <select
-                        id="title"
-                        value={initialvalues.title}
-                        name="title"
-                        required
+                        id="gender"
+                        value={initialvalues.gender}
+                        name="gender"
                         onChange={handleChange}
                         className="rounded-lg border p-4 border-gray-600 text-gray-500 bg-white "
                       >
@@ -71,7 +96,6 @@ function PersonalData() {
                         <option value="Ms">Ms</option>
                       </select>
                       <input
-                        required
                         type="text"
                         name="fullname"
                         value={initialvalues.fullname}
@@ -147,7 +171,7 @@ function PersonalData() {
                   onChange={handleChange}
                   value={initialvalues.employment}
                   placeholder="What is your current employment status?"
-                  id="title"
+                  id="employment"
                   name="employment"
                   className="rounded-lg border p-4 border-gray-600 text-gray-500 bg-white "
                 >

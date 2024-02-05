@@ -7,7 +7,6 @@ function Home() {
   const navigate = useNavigate();
   useEffect(() => {
     let user = localStorage.getItem("user");
-    console.log(user, "koooooooooooooooooooo");
     if (!user) {
       navigate("/");
     }

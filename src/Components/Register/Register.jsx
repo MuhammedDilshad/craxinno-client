@@ -36,14 +36,15 @@ function Register() {
     onSubmit: async (values, { setErrors }) => {
       try {
         const response = await signUp(values);
-        console.log("Form data submitted:", response.data);
 
         if (response.data?.errors) {
-          console.log("Showing alert");
           setAlertMessage(response.data.errors.message);
         }
 
-        localStorage.setItem("user", response.data);
+        const { user, token } = response.data;
+
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token", token);
         setErrors({});
         if (!response.data?.errors) {
           navigate("/home");
